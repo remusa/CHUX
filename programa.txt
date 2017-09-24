@@ -1,0 +1,42 @@
+#
+
+inicio() {
+   int x, y, z;
+   double z;
+
+   x = 2 + 4;
+   y = 3.14;
+
+   call funcionA();
+   call funcionB(int x, double y);
+}
+
+funcionA() {
+   int y;
+
+   y = read(int);
+   put:("cad");
+}
+
+funcionB(int x, double y) {
+   int w;
+   double z;
+   string a, b;
+
+   w = "test";
+   put:(x);
+
+   while(x > y or y < z) {
+      z = z + 1;
+   }
+
+   do {
+      y = y + 1;
+   } while(x > y and y < z);
+
+   for(int i = 1; z < x; i = i + 1) {
+      z = z + 1;
+   }
+}
+
+#
