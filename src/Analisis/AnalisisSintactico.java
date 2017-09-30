@@ -359,8 +359,16 @@ public class AnalisisSintactico {
                     Postfijo objPostfijo = new Postfijo(arrValores);
                     postfijo = objPostfijo.getPosfijo();
                     
+                    ////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////
+                    //EVALUACIÓN
                     Evaluacion eva = new Evaluacion();
+                    ////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////
+                    
                     ArrayList<String> arrTiposDatosPostfijo = new ArrayList<>();
+                    
+                    //ni se pa que pero bueno pos me mato
                     for (String aux : postfijo) {
                         System.out.println("aux " + aux);
                         
@@ -391,13 +399,22 @@ public class AnalisisSintactico {
                         
                     }
                 
-//                    String res = eva.evaluation(postfijo, arrTiposDatosPostfijo);
+                    String res = "";
+                    try {
+                        res = eva.evaluation(postfijo, arrTiposDatosPostfijo);
+                        variables.get(0).setValor(res);
+                    } catch (Exception e) {
+                        res = "error";
+                    }
+                    
+                    variables.get(0).setValor(res);
                     
                     System.out.println("var: " + variableActual 
                             + "\narrValores: " + arrValores 
                             + "\narrTiposDato: " + arrTiposDato 
                             + "\npostfijo: " + postfijo 
-                            + "\narrTiposDatosPostfijo: " + arrTiposDatosPostfijo);
+                            + "\narrTiposDatosPostfijo: " + arrTiposDatosPostfijo
+                    );
                     
                     variables.get(indexVariable).setValor(postfijo.toString());
                 }

@@ -5,6 +5,7 @@
  */
 package Postfijo;
 
+import Modelo.Automata;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,20 +75,28 @@ public class Evaluacion {
     public static void main(String[] args) throws IOException {
         ArrayList<String> exp = new ArrayList<>();
         exp.add("x");
-        exp.add("2");
+        exp.add("2.3");
         exp.add("4");
         exp.add("^");
         exp.add("=");
 
         ArrayList<String> types = new ArrayList<>();
-        types.add("int");
-        types.add("int");
         types.add("double");
+        types.add("double");
+        types.add("int");
         types.add("^");
         types.add("=");
 
         Evaluacion eva = new Evaluacion();
         eva.evaluation(exp, types);
+    }
+
+    private boolean checkTypes(String typeX, String typeY) {
+        String typeResult = typeX + "," + typeY;
+        if (!dataTypes.containsKey(typeResult) || "-".equals(dataTypes.get(typeResult))) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -99,6 +108,7 @@ public class Evaluacion {
     public String evaluation(ArrayList<String> exp, ArrayList<String> types) {
         System.out.println("exp " + exp + "\ndataTypes" + types);
         String res = "";
+        String tipoFinal = types.get(0);
 
         for (int i = 0; i < exp.size(); i++) {
             if (operators.contains(exp.get(i))) { //es un operador
@@ -106,36 +116,66 @@ public class Evaluacion {
 
                 String tipoX = types.get(i - 2);
                 String tipoY = types.get(i - 1);
-                String tipoZ = "";
-                
-                if (dataTypes.containsKey(tipoX + "," + tipoY)) {
-                    tipoZ = dataTypes.get(tipoX + "," + tipoY); //obtener el tipo
+
+                if (checkTypes(tipoX, tipoY)) {
+                    String tipoZ = tipoZ = dataTypes.get(tipoX + "," + tipoY); //obtener el tipo
                     System.out.println("tipoZ " + tipoZ);
+
+                    if (checkTypes(tipoX, tipoY)) {
+                        Object x = exp.get(i - 2);
+                        Object y = exp.get(i - 1);
+                        Object z = evaluationOperator(op, x, y, tipoX, tipoY);
+
+                        System.out.println("Op: " + op + "\tX: " + x + "\tY: " + y + "\tR: " + z);
+
+                        i = i - 2;
+                        exp.remove(i);
+                        exp.remove(i);
+                        exp.remove(i);
+                        types.remove(i);
+                        types.remove(i);
+                        types.remove(i);
+
+                        exp.add(i, z.toString()); //se agrega el resultado
+                    } else {
+                        System.out.println("Error tipo de datos");
+                    }
+
                 }
 
-                Object x = exp.get(i - 2);
-                Object y = exp.get(i - 1);
-                Object z = evaluationOperator(op, x, y);
-
-//                System.out.println("Op: " + op + "\nX: " + x + "\nY: " + y + "\nR: " + z);
-                i = i - 2;
-                exp.remove(i);
-                exp.remove(i);
-                exp.remove(i);
-
-                types.remove(i);
-                types.remove(i);
-                types.remove(i);
-
-                exp.add(i, z.toString()); //se agrega el resultado
-            } //finalizamos
-            else if ("=".equals(exp.get(i))) {
+            } else if ("=".equals(exp.get(i))) {
                 res = exp.get(i - 1);
             }
 
         }
+
+        int tipoRes = new Automata().AutomataGral(res);
+        String tipoRes2 = "";
+        switch (tipoRes) {
+            case 51:
+                tipoRes2 = "string";
+                break;
+            case 54:
+                tipoRes2 = "char";
+                break;
+            case 53:
+                tipoRes2 = "double";
+                break;
+            case 52:
+                tipoRes2 = "int";
+                break;
+            default:
+                tipoRes2 = "error";
+        }
+
+        System.out.println("tipoFinal " + tipoFinal + "\ntipoRes2 " + tipoRes2);
+        if (!tipoFinal.equals(tipoRes2)) {
+            System.out.println("error tipo dato");
+            return "error tipo dato";
+        }
+
         System.out.println("res " + res);
-        return "";
+        return res;
     }
 
     /**
@@ -145,23 +185,64 @@ public class Evaluacion {
     @param y
     @return 
      */
-    private Object evaluationOperator(String op, Object x, Object y) {
+    private Object evaluationOperator(String op, Object x, Object y, String tipoX, String tipoY) {
         Object temp = null;
+
         switch (op) {
             case "^":
-                temp = Math.pow(Double.parseDouble((String) x), Double.parseDouble((String) y));
+                if ("int".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Math.pow(Integer.parseInt((String) x), Integer.parseInt((String) y));
+                } else if ("int".equals(tipoX) && "double".equals(tipoY)) {
+                    temp = Math.pow(Integer.parseInt((String) x), Double.parseDouble((String) y));
+                } else if ("double".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Math.pow(Double.parseDouble((String) x), Integer.parseInt((String) y));
+                } else {
+                    temp = Math.pow(Double.parseDouble((String) x), Double.parseDouble((String) y));
+                }
                 break;
             case "*":
-                temp = Double.parseDouble((String) x) * Double.parseDouble((String) y);
+                if ("int".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Integer.parseInt((String) x) * Integer.parseInt((String) y);
+                } else if ("int".equals(tipoX) && "double".equals(tipoY)) {
+                    temp = Integer.parseInt((String) x) * Double.parseDouble((String) y);
+                } else if ("double".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Double.parseDouble((String) x) * Integer.parseInt((String) y);
+                } else {
+                    temp = Double.parseDouble((String) x) * Double.parseDouble((String) y);
+                }
                 break;
             case "/":
-                temp = Double.parseDouble((String) x) / Double.parseDouble((String) y);
+                if ("int".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Integer.parseInt((String) x) / Integer.parseInt((String) y);
+                } else if ("int".equals(tipoX) && "double".equals(tipoY)) {
+                    temp = Integer.parseInt((String) x) / Double.parseDouble((String) y);
+                } else if ("double".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Double.parseDouble((String) x) / Integer.parseInt((String) y);
+                } else {
+                    temp = Double.parseDouble((String) x) / Double.parseDouble((String) y);
+                }
                 break;
             case "+":
-                temp = Double.parseDouble((String) x) + Double.parseDouble((String) y);
+                if ("int".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Integer.parseInt((String) x) + Integer.parseInt((String) y);
+                } else if ("int".equals(tipoX) && "double".equals(tipoY)) {
+                    temp = Integer.parseInt((String) x) + Double.parseDouble((String) y);
+                } else if ("double".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Double.parseDouble((String) x) + Integer.parseInt((String) y);
+                } else {
+                    temp = Double.parseDouble((String) x) + Double.parseDouble((String) y);
+                }
                 break;
             case "-":
-                temp = Double.parseDouble((String) x) - Double.parseDouble((String) y);
+                if ("int".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Integer.parseInt((String) x) - Integer.parseInt((String) y);
+                } else if ("int".equals(tipoX) && "double".equals(tipoY)) {
+                    temp = Integer.parseInt((String) x) - Double.parseDouble((String) y);
+                } else if ("double".equals(tipoX) && "int".equals(tipoY)) {
+                    temp = Double.parseDouble((String) x) - Integer.parseInt((String) y);
+                } else {
+                    temp = Double.parseDouble((String) x) - Double.parseDouble((String) y);
+                }
                 break;
         }
         return temp;
